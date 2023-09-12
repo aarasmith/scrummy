@@ -27,11 +27,11 @@ func main() {
 		fmt.Println("Page visited: ", r.Request.URL) 
 	}) 
 
-	c.OnHTML("body", func(e *colly.HTMLElement) { 
-		
-		e.ForEach("div.wprm-recipe-ingredient-group", func(_ int, el *colly.HTMLElement) {
-			recipeIngredientGroup := el.ChildText(".wprm-recipe-ingredient-group-name")
-			fmt.Printf("%s\n", recipeIngredientGroup) 
+	c.OnHTML("div.wprm-recipe-ingredient-group", func(e *colly.HTMLElement) { 
+
+		recipeIngredientGroup := e.ChildText(".wprm-recipe-ingredient-group-name")
+		fmt.Printf("%s\n", recipeIngredientGroup) 
+		e.ForEach("li.wprm-recipe-ingredient", func(_ int, el *colly.HTMLElement) {
 			recipeIngredient := RecipeIngredient{}
 		
 			recipeIngredient.name = el.ChildText(".wprm-recipe-ingredient-name")
@@ -41,7 +41,7 @@ func main() {
 
 			recipeIngredients = append(recipeIngredients, recipeIngredient)
 
-			fmt.Printf("%v+\n", recipeIngredient) 
+			fmt.Printf("%+v\n", recipeIngredient) 
 		})
 		
 	}) 
