@@ -1,16 +1,24 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"github.com/gocolly/colly"
 )
 
 type RecipeIngredient struct {
-	name, amount, unit, notes string
+	group, Name, Amount, Unit, Notes string
 }
 
 var recipeIngredients []RecipeIngredient
+
+type RecipeIngredientGroup struct {
+	Group string
+	Ingredients []RecipeIngredient
+}
+
+var recipeIngredientGroups []RecipeIngredientGroup
 
 func main() {
 	c := colly.NewCollector()
@@ -29,21 +37,33 @@ func main() {
 
 	c.OnHTML("div.wprm-recipe-ingredient-group", func(e *colly.HTMLElement) { 
 
-		recipeIngredientGroup := e.ChildText(".wprm-recipe-ingredient-group-name")
-		fmt.Printf("%s\n", recipeIngredientGroup) 
+		recipeIngredientGroup := RecipeIngredientGroup{}
+		recipeIngredientGroup.Group = e.ChildText(".wprm-recipe-ingredient-group-name")
+		// fmt.Printf("%s\n", recipeIngredientGroup) 
 		e.ForEach("li.wprm-recipe-ingredient", func(_ int, el *colly.HTMLElement) {
 			recipeIngredient := RecipeIngredient{}
-		
-			recipeIngredient.name = el.ChildText(".wprm-recipe-ingredient-name")
-			recipeIngredient.amount = el.ChildText(".wprm-recipe-ingredient-amount")
-			recipeIngredient.unit = el.ChildText(".wprm-recipe-ingredient-unit")
-			recipeIngredient.notes = el.ChildText(".wprm-recipe-ingredient-notes")
+			
+			recipeIngredient.group = recipeIngredientGroup.Group
+			recipeIngredient.Name = el.ChildText(".wprm-recipe-ingredient-name")
+			recipeIngredient.Amount = el.ChildText(".wprm-recipe-ingredient-amount")
+			recipeIngredient.Unit = el.ChildText(".wprm-recipe-ingredient-unit")
+			recipeIngredient.Notes = el.ChildText(".wprm-recipe-ingredient-notes")
 
 			recipeIngredients = append(recipeIngredients, recipeIngredient)
+			
+			recipeIngredientGroup.Ingredients = append(recipeIngredientGroup.Ingredients, recipeIngredient)
 
-			fmt.Printf("%+v\n", recipeIngredient) 
+			// fmt.Printf("%+v\n", recipeIngredientGroup) 
 		})
+
+		recipeIngredientGroups = append(recipeIngredientGroups, recipeIngredientGroup)
+		// fmt.Printf("%+v\n", recipeIngredientGroup)
 		
+		empJSON, err := json.MarshalIndent(recipeIngredientGroup, "", "  ")
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+		fmt.Printf("MarshalIndent funnction output %s\n", string(empJSON))
 	}) 
 	 
 	// c.OnHTML("li.wprm-recipe-ingredient", func(e *colly.HTMLElement) { 

@@ -1,4 +1,4 @@
-module web-scraper
+module github.com/aarasmith/scrummy
 
 go 1.18
 
